@@ -6,6 +6,7 @@
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
+    "@sendgrid/mail": "^6.5.0",
     "mongoose": "^5.8.9",
     "serialize-error": "^5.0.0"
   },

@@ -6,6 +6,7 @@ const config = require('../../shared/config');
 const constants = require('../constants');
 const User = require('./models/User');
 const UpdateUserOnlineStatus = require('./models/UpdateUserOnlineStatus');
+const EmailAlert = require('./models/EmailAlert');
 
 
 // Initialize Mongoose and connect to MongoDB database
@@ -88,8 +89,34 @@ async function resetStaleUsersOnlineStatus() {
 }
 
 
+function getQueuedEmailAlerts() {
+    logger.log(`getQueuedEmailAlerts invoked`);
+    const queryLiteral = {
+        status: constants.EMAIL_STATUS_QUEUED
+    };
+    logger.log(`getQueuedEmailAlerts -> queryLiteral: ${JSON.stringify(queryLiteral)}`);
+
+    const query = EmailAlert.find(queryLiteral); // get list of queued email alerts
+    return query.lean().exec(); 
+}
+
+
+function setEmailAlertStatus(id, status) {
+    logger.log(`setEmailAlertStatus invoked`);
+    logger.log(`setEmailAlertStatus -> id: ${id}, status: ${status}`);
+    const queryLiteral = {
+        _id: id
+    };
+    logger.log(`setEmailAlertStatus -> queryLiteral: ${JSON.stringify(queryLiteral)}`);
+
+    const query = EmailAlert.findOneAndUpdate(queryLiteral, {status}); // update email alert status
+    return query.exec(); 
+}
+
 module.exports = {
     initMongoose,
     closeMongooseConnection,
-    resetStaleUsersOnlineStatus
+    resetStaleUsersOnlineStatus,
+    getQueuedEmailAlerts,
+    setEmailAlertStatus
 };

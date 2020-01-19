@@ -28,5 +28,11 @@ module.exports =  {
     EVENT_CHAT_UPDATED: 'EVENT_CHAT_UPDATED',
     EVENT_CHAT_NEW_MESSAGES: 'EVENT_CHAT_NEW_MESSAGES',
     PING_SERVER_INTERVAL_SECONDS: 60, // how often do clients ping the server via WebSocket to update online timestamp
-    STALE_USER_MISSED_PINGS_COUNT: 2 // how many pings from the client may be missed before the user is considered stale and the status must be reset to offline
+    STALE_USER_MISSED_PINGS_COUNT: 2, // how many pings from the client may be missed before the user is considered stale and the status must be reset to offline
+    EMAIL_TYPE_CONFIRMATION_LINK: 'confirmation_link',
+    EMAIL_TYPE_REGISTRATION_REQUEST: 'registration_request',
+    EMAIL_TYPE_NEW_MESSAGES: 'new_messages',
+    EMAIL_STATUS_QUEUED: 'queued',
+    EMAIL_STATUS_SENT: 'sent',
+    EMAIL_STATUS_FAILED: 'failed'
 };

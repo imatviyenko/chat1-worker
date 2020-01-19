@@ -1,8 +1,10 @@
 const {serializeError} = require('serialize-error');
 
+
 function setContext(context) {
     this.context = context;
 }
+
 
 function log(message) {
     const _message = `${message}`;
