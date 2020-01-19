@@ -1,0 +1,16 @@
+1)
+User1: 9668
+User2: 6736
+
+2)
+kill 6736
+
+3) User2 is logged out
+User1 is not aware that User2 is offline and still displays his status as Online
+
+
+After some output in chat1-worker:
+2020-01-19T16:20:00.494 [Information] resetStaleUsersOnlineStatus -> queryLiteral: {"lastOnlinePingTimestamp":{"$lt":1579450680485}}
+2020-01-19T16:20:00.525 [Information] resetStaleUsersOnlineStatus -> staleUsersIds: [{"_id":"5e24770f2604f11a50a3514d"}]
+
+

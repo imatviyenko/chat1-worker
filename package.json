@@ -5,6 +5,9 @@
   "scripts": {
     "test": "echo \"No tests yet...\""
   },
-  "dependencies": {},
+  "dependencies": {
+    "mongoose": "^5.8.9",
+    "serialize-error": "^5.0.0"
+  },
   "devDependencies": {}
 }
