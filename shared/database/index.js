@@ -8,27 +8,35 @@ const User = require('./models/User');
 const UpdateUserOnlineStatus = require('./models/UpdateUserOnlineStatus');
 const EmailAlert = require('./models/EmailAlert');
 
+// https://stackoverflow.com/questions/53422257/reusing-database-connections-with-azure-functions-using-javascript
 
 // Initialize Mongoose and connect to MongoDB database
-const initMongoose = async () => {
-    const mongodbUri = config.mongodbUri;
-    logger.log(`initMongoose -> mongodbUri: ${mongodbUri}`);
-    await mongoose.connect(mongodbUri, {
-        useNewUrlParser: true, 
-        useUnifiedTopology: true,
-        useCreateIndex: true,
-        useFindAndModify: false
-    });
+const openDatabaseConnection = async () => {
+    logger.log(`database.openDatabaseConnection invoked`);
 
+    if (mongoose.connection.readyState === 0 || mongoose.connection.readyState === 3) {
+        logger.log(`database.openDatabaseConnection -> opening mongoose database connection`);
+        const mongodbUri = config.mongodbUri;
+        logger.log(`database.openDatabaseConnection -> mongodbUri: ${mongodbUri}`);
+        await mongoose.connect(mongodbUri, {
+            useNewUrlParser: true, 
+            useUnifiedTopology: true,
+            useCreateIndex: true,
+            useFindAndModify: false
+        });
+    }
 };
 
 // Disconnect from MongoDB database
-const closeMongooseConnection = async () => {
+const closeDatabaseConnection = async () => {
+    logger.log(`database.closeDatabaseConnection invoked`);
     await mongoose.disconnect();
 };
 
 
 async function getUsersByContactId(contactUserId) {
+    logger.log(`database.getUsersByContactId invoked`);
+
     const queryLiteral = {
         "contacts": contactUserId
     };
@@ -42,7 +50,7 @@ async function getUsersByContactId(contactUserId) {
 
 
 async function resetStaleUsersOnlineStatus() {
-    logger.log(`resetStaleUsersOnlineStatus invoked`);
+    logger.log(`database.resetStaleUsersOnlineStatus invoked`);
     
     const now = new Date();
     const cutoffTimestamp = now.setSeconds(now.getSeconds() - (constants.PING_SERVER_INTERVAL_SECONDS * 2)); // user is stale if at least two pings are missed
@@ -52,12 +60,12 @@ async function resetStaleUsersOnlineStatus() {
             '$lt': cutoffTimestamp
         }
     };
-    logger.log(`resetStaleUsersOnlineStatus -> queryLiteral: ${JSON.stringify(queryLiteral)}`);
+    logger.log(`database.resetStaleUsersOnlineStatus -> queryLiteral: ${JSON.stringify(queryLiteral)}`);
 
     const getStaleUsersIdsQuery = User.find(queryLiteral, '_id'); // get list of users ids
     const staleUsersDocs = await getStaleUsersIdsQuery.lean().exec(); //  staleUsersDocs: [{"_id":"5e24770f2604f11a50a3514d"}]
     const staleUsersIds = staleUsersDocs.map( u => u._id );
-    logger.log(`resetStaleUsersOnlineStatus -> staleUsersIds: ${JSON.stringify(staleUsersIds)}`);
+    logger.log(`database.resetStaleUsersOnlineStatus -> staleUsersIds: ${JSON.stringify(staleUsersIds)}`);
     
 
     if (Array.isArray(staleUsersIds) && staleUsersIds.length > 0) {
@@ -90,11 +98,11 @@ async function resetStaleUsersOnlineStatus() {
 
 
 function getQueuedEmailAlerts() {
-    logger.log(`getQueuedEmailAlerts invoked`);
+    logger.log(`database.getQueuedEmailAlerts invoked`);
     const queryLiteral = {
         status: constants.EMAIL_STATUS_QUEUED
     };
-    logger.log(`getQueuedEmailAlerts -> queryLiteral: ${JSON.stringify(queryLiteral)}`);
+    logger.log(`database.getQueuedEmailAlerts -> queryLiteral: ${JSON.stringify(queryLiteral)}`);
 
     const query = EmailAlert.find(queryLiteral); // get list of queued email alerts
     return query.lean().exec(); 
@@ -102,8 +110,8 @@ function getQueuedEmailAlerts() {
 
 
 function setEmailAlertStatus(id, status) {
-    logger.log(`setEmailAlertStatus invoked`);
-    logger.log(`setEmailAlertStatus -> id: ${id}, status: ${status}`);
+    logger.log(`database.setEmailAlertStatus invoked`);
+    logger.log(`database.setEmailAlertStatus -> id: ${id}, status: ${status}`);
     const queryLiteral = {
         _id: id
     };
@@ -113,9 +121,10 @@ function setEmailAlertStatus(id, status) {
     return query.exec(); 
 }
 
+
 module.exports = {
-    initMongoose,
-    closeMongooseConnection,
+    openDatabaseConnection,
+    closeDatabaseConnection,
     resetStaleUsersOnlineStatus,
     getQueuedEmailAlerts,
     setEmailAlertStatus

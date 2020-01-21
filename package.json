@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@sendgrid/mail": "^6.5.0",
+    "bottleneck": "^2.19.5",
     "mongoose": "^5.8.9",
     "serialize-error": "^5.0.0"
   },

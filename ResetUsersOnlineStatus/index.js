@@ -1,12 +1,11 @@
 const logger = require('../shared/logger');
 
-const {initMongoose, resetStaleUsersOnlineStatus, closeMongooseConnection} = require('../shared/database');
+const {openDatabaseConnection, resetStaleUsersOnlineStatus} = require('../shared/database');
 
 module.exports = async function (context, myTimer) {
     logger.setContext(context);
     logger.log(`ResetUsersOnlineStatus invoked at ${new Date().toISOString()}`);
 
-    await initMongoose();
+    await openDatabaseConnection();
     await resetStaleUsersOnlineStatus();
-    await closeMongooseConnection();
 };
